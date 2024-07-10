@@ -1,13 +1,14 @@
-# arrange these
 import argparse
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.action_chains import ActionChains
-import sqlite3
-import pandas as pd
 import time
 import datetime
 import pytz
+
+import pandas as pd
+import sqlite3
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
+
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--seqstart', type=int, required=True,
@@ -16,7 +17,6 @@ parser.add_argument('--seqend', type=int, required=True,
                     help='The stock sequence number, up to which I scrape data (starting from 1 not 0).')
 
 args = parser.parse_args()
-
 i_start = args.seqstart - 1
 i_end = args.seqend
 
@@ -64,16 +64,15 @@ for i in stock_list.index:
 
     # read the downloaded file
     time.sleep(5)
-    stock_price = pd.read_excel(f'/Users/Chen/Downloads/Equities_{stock_list.iloc[i]["Stock Code"]}.xlsx')
+    stock_price = pd.read_excel(f'/Users/Chen/Downloads/Equities_{stock_code_i}.xlsx')
     stock_price.rename(columns={'Time': 'date', 'Closed Price': 'close', 'Volume': 'volume'}, inplace=True)
     stock_price['date'] = pd.to_datetime(stock_price['date'], format='%Y/%m/%d')
-    # stock_price['date'] = stock_price.date.str.replace('/', '')
     print('Read data.')
 
     # put the imported data in a db
     with sqlite3.connect("/Users/Chen/project/get_stock_price/stock_price.db") as con:
         cur = con.cursor()
-        equity_name = f'equities_{stock_list.iloc[i]["Stock Code"]}'
+        equity_name = f'equities_{stock_code_i}'
 
         existing_equities = cur.execute("SELECT name FROM sqlite_master WHERE type='table';").fetchall()
         existing_equities = [i[0] for i in existing_equities]
